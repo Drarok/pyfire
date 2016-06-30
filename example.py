@@ -1,20 +1,19 @@
 import pyfire
+import pyfire.utils as utils
+import config
 
-# Example use
+# Example use of Pyfire
 
-# Set URL endpoint for Firebase realtime database
-Pyfire = pyfire.Pyfire("https://tomi-firebase-test.firebaseio.com/")
+# Set URL endpoint and secret key (respectively) to the Firebase realtime database
+Pyfire = pyfire.Pyfire("https://my-project-name.firebaseio.com/", 'nZg6eiRBcxBvxcjPEztl8PVAOdNIoi8jl7NGJlW6')
 
-# Post to the database in order to store object, ,ethod returns posted object upon successful insertion
-# This will insert the object under a new unique ID.
-# Read more about the IDL https://firebase.googleblog.com/2015/02/the-2120-ways-to-ensure-unique_68.html)
-Pyfire.post({"post": "works"})
+new_object = Pyfire.post({'Foo':'Bar'}) # Post an object to the Firebase realtime database. The object will be assigned an unique key. EG: "-KLYFXcwUO-rKJMwrT0F" and the stored object is returned
+new_object_name = utils.get_property_from_json_string('name', new_object) # Get the random key generated for the above object (can be used to add further children by changing the relative path to this)
 
-# Get objects from DB
-print Pyfire.get()
+Pyfire.set_endpoint_path(new_object_name) # Set path to the key of the item just created
 
-# Set RELATIVE endpoint path (so path for request will be: https://tomi-firebase-test.firebaseio.com/users/tomi.json
-Pyfire.set_endpoint_path("users/tomi")
+Pyfire.put({'bar': 'foo'}) # Puts a new object into current path. This overrides(deletes) everything under this key
 
-# Get back value under new relative endpoint
-print "Value for [users:tomi] is: " + Pyfire.get()
+Pyfire.patch({'more': 'data'}) # Add a new object into current path. This does not overrite existing children, but just appends this one
+
+print Pyfire.set_endpoint_path('').get() # Set endpoint path back to the root and get the contents. (This line demonstrates how certain request can be chained)

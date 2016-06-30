@@ -32,3 +32,16 @@ App Engine uses the [urlfetch](https://pypi.python.org/pypi/urlfetch) library fo
 [Generating Firebase JWT with python](https://github.com/firebase/firebase-token-generator-python)
 
 [Firebase REST API reference](https://firebase.google.com/docs/reference/rest/database/)
+
+https://firebase.google.com/docs/auth/server/#overview
+
+##### Authenticating Requests
+
+
+https://firebase.google.com/docs/reference/rest/database/user-auth
+
+
+#### Firebase Query Parameters
+
+
+https://firebase.google.com/docs/reference/rest/database/#section-query-parameters

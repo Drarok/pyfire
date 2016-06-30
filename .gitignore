@@ -3,3 +3,6 @@
 
 # Editor files
 .idea/
+
+# Project specific config/credentials file
+config.py
