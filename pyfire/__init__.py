@@ -12,6 +12,7 @@ class Pyfire:
 
     def set_endpoint_path(self, endpoint_path):
         self.endpoint_path = endpoint_path
+        return self
 
     # GET - Reading data
     # Data from our Firebase database can be read by issuing an HTTP GET request to an endpoint:
