@@ -17,3 +17,6 @@ Pyfire.put({'bar': 'foo'})  # Puts a new object into current path. This override
 Pyfire.patch({'more': 'data'})  # Add a new object into current path. This does not overrite existing children, but just appends this one
 
 print Pyfire.set_endpoint_path('').get()  # Set endpoint path back to the root and get the contents. (This line demonstrates how certain request can be chained)
+
+# Get entity (user) with a specific value (abcdefg) for a specified key (prop_name)
+print Pyfire.set_endpoint_path('user').order_by("prop_name").equal_to("abcdefg").get()

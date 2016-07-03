@@ -1,13 +1,18 @@
 import urllib2
 import json
 
+
 class Pyfire:
 
-    def __init__(self, url, secret = None):
-        self.root_data_url = url
+    def __init__(self, url, secret=None):
+        if not url.endswith('/'):
+            self.root_data_url = ''.join([url, '/'])
+        else:
+            self.root_data_url = url
         self.endpoint_path = ''
         self.auth_token = None
         self.database_secret = secret # Create database secrets here: https://console.firebase.google.com/ => Select your project => Click settings wheel in top left => Project Settings => Database => Add Secret
+        self.query_params = {}
 
     def get_endpoint_path(self):
         return self.endpoint_path
@@ -51,21 +56,39 @@ class Pyfire:
     def delete(self):
         return self._execute("DELETE", {})
 
+    def order_by(self, order_by):
+        self.query_params["orderBy"] = order_by
+        return self
+
+    def equal_to(self, equal):
+        self.query_params["equalTo"] = equal
+        return self
+
     def _execute(self, request_method, data):
-        request_url = self.root_data_url + self.endpoint_path + '/.json'
+        request_url = self.root_data_url + self.endpoint_path + '.json?'
+        query_string = None
+
+        if self.database_secret:
+            request_url += 'auth=' + self.database_secret
+
+        if self.query_params:
+            query_string = "&"
+            if self.query_params.get('orderBy'):
+                query_string += 'orderBy=\"'+self.query_params.get('orderBy')+'\"'
+                # Can only use equalTo with orderBy, so nest if statement
+                if self.query_params.get('equalTo'):
+                    query_string += '&equalTo=\"'+self.query_params.get('equalTo')+'\"'
+
+        if query_string:
+            request_url += query_string
 
         headers = {}
         data_json = json.dumps(data)
 
-        if self.database_secret:
-            # headers.update({'Authorization': 'Bearer ' + self.auth_token}) # For some reason trying to authenticate with the headers does not work but it does with the querystring
-            request_url += '?auth=' + self.database_secret
-
-        headers.update({'X-HTTP-Method-Override': request_method.upper()}) # TODO: explain reasoning for why I use this
+        headers.update({'X-HTTP-Method-Override': request_method.upper()})  # TODO: explain reasoning for why I use this
         headers.update({'Content-Type': 'application/json'})
 
         req = urllib2.Request(request_url, data_json, headers)
-
         response = urllib2.urlopen(req).read()
 
         return response
