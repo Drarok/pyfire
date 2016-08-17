@@ -28,33 +28,38 @@ class Pyfire:
         self.database_secret = secret
         return self
 
+    def child(self, *args):
+        path = "/".join(args)
+        self.endpoint_path += "/{}".format(path)
+        return self
+
     # GET - Reading data
     # The response will contain all the data under the specified endpoint path
     def get(self):
-        return self._execute("GET", {})
+        return json.loads(self._execute("GET", {}))
 
     # PUT - Writing Data:
     # This will override everything under the current working path with the object specified
     def put(self, data):
-        return self._execute("PUT", data)
+        return json.loads(self._execute("PUT", data))
 
     # POST - Pushing Data
     # This will create a new object at the current path with a new unique key.
     # The response will contain the newly created object (along with its generated key (its 'name' attribute)
     def post(self, data):
-        return self._execute("POST", data)
+        return json.loads(self._execute("POST", data))
 
     # PATCH - Updating Data
     # We can update specific children at a location without overwriting existing data using a PATCH request.
     # Named children in the data being written with PATCH will be overwritten, but omitted children will not be deleted.
     # A successful request will be indicated by a 200 OK HTTP status code. The response will contain the data written:
     def patch(self, data):
-        return self._execute("PATCH", data)
+        return json.loads(self._execute("PATCH", data))
 
     # DELETE - Removing Data
-    # Deletes everyhing under the current path
+    # Deletes everything under the current path
     def delete(self):
-        return self._execute("DELETE", {})
+        return json.loads(self._execute("DELETE", {}))
 
     def order_by(self, order_by):
         self.query_params["orderBy"] = order_by
@@ -68,17 +73,22 @@ class Pyfire:
         request_url = self.root_data_url + self.endpoint_path + '.json?'
         query_string = None
 
+        # IF a firebase database secret is set, append it to the query as the 'auth' query param
         if self.database_secret:
             request_url += 'auth=' + self.database_secret
 
+        # Has the user specified any extra query params?
         if self.query_params:
             query_string = "&"
+            # Add the order by param,
+            # Reason for the weird selection of quotes below is that the param must be wrapped in double quotes
             if self.query_params.get('orderBy'):
                 query_string += 'orderBy=\"'+self.query_params.get('orderBy')+'\"'
-                # Can only use equalTo with orderBy, so nest if statement
+                # Firebase can only use equalTo ALONG with orderBy, so nest if statement withing the order by one
                 if self.query_params.get('equalTo'):
                     query_string += '&equalTo=\"'+self.query_params.get('equalTo')+'\"'
 
+        # IF we've built a query string above, add it to the request url
         if query_string:
             request_url += query_string
 
