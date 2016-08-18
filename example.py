@@ -1,31 +1,27 @@
 import pyfire
 import config
 
-# Example use of Pyfire
-
 # Set URL endpoint and secret key (respectively) to the Firebase realtime database
 Pyfire = pyfire.Pyfire(config.FIREBASE_DATABASE_URL, config.FIREBASE_DATABASE_SECRET)
 
-new_object = Pyfire.post({'Foo': 'Bar'})  # Post an object to the Firebase realtime database. The object will be assigned an unique key. EG: "-KLYFXcwUO-rKJMwrT0F" and the stored object is returned
-new_object_name = new_object['name']  # Get the random key generated for the above object (can be used to add further children by changing the relative path to this)
+# Create an object in the Test collection
+id = Pyfire.post('Test', {'Foo': 'Bar'})
 
-Pyfire.set_endpoint_path(new_object_name) # Set path to the key of the item just created
+# Get the random key generated for the above object (can be used to add further
+# children), then replace everything under this key
+Pyfire.put('Test/' + id, {'bar': 'foo'})
 
-Pyfire.put({'bar': 'foo'})  # Puts a new object into current path. This overrides(deletes) everything under this key
+# Add a new object. This does not overrite existing children, but just appends this one
+Pyfire.patch('Test/' + id, {'more': 'data'})
 
-Pyfire.patch({'more': 'data'})  # Add a new object into current path. This does not overrite existing children, but just appends this one
+# Get the contents.
+print Pyfire.get('Test/' + id)
 
-print Pyfire.set_endpoint_path('').get()  # Set endpoint path back to the root and get the contents. (This line demonstrates how certain request can be chained)
+# Get objects by querying - you will need to set up .indexOn for this to work
+try:
+    print Pyfire.query('Test').order_by('bar').equal_to('foo').get()
+except Exception as e:
+    print e
 
-# Get entity (user) with a specific value (abcdefg) for a specified key (prop_name)
-print Pyfire.set_endpoint_path('user').order_by("access_code").equal_to("abcdefg").get()
-
-Pyfire.set_endpoint_path('')  # reset path for example to make more sense
-
-# Use child method with variable amount of arguments
-print Pyfire.child('user', '-KLn5QoiyCLp3UQTIhXL', 'email_address').get()
-
-Pyfire.set_endpoint_path('')  # reset path for example to make more sense
-
-# Child with just one arg
-print Pyfire.child('user').get()
+# Delete the object we created
+Pyfire.delete('Test/' + id)
